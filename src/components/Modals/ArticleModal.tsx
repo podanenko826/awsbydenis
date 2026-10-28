@@ -1,27 +1,32 @@
-'use client';
-import React, { Suspense, lazy, useEffect, useState } from 'react';
-import Image from 'next/image';
-import styles from './Modals.module.css';
-import moment from 'moment';
-import Link from 'next/link';
-import { FaXTwitter } from 'react-icons/fa6';
-import { FaFacebookF, FaLinkedin, FaRedditAlien } from 'react-icons/fa';
+"use client";
+import React, { Suspense, lazy, useEffect, useState } from "react";
+import Image from "next/image";
+import styles from "./Modals.module.css";
+import moment from "moment";
+import Link from "next/link";
+import { FaXTwitter } from "react-icons/fa6";
+import { FaFacebookF, FaLinkedin, FaRedditAlien } from "react-icons/fa";
 
-import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { PostItem } from '@/types';
-import { getPopularPosts, getPost, trackView, getAdjacentPosts } from '@/lib/posts';
-import { MDXProvider } from '@mdx-js/react';
-import { mdSerialize } from '../../services/mdSerializer';
-import { useMDXComponents } from '../../../mdx-components';
-import { notFound, usePathname, useRouter } from 'next/navigation';
-import { usePostStore } from '../posts/store';
-import { useAuthorStore } from '../authors/store';
-import LoadingSkeleton from '../LoadingSkeleton';
-import '@/app/page.css';
+import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
+import { PostItem } from "@/types";
+import {
+    getPopularPosts,
+    getPost,
+    trackView,
+    getAdjacentPosts,
+} from "@/lib/posts";
+import { MDXProvider } from "@mdx-js/react";
+import { mdSerialize } from "../../services/mdSerializer";
+import { useMDXComponents } from "../../../mdx-components";
+import { notFound, usePathname, useRouter } from "next/navigation";
+import { usePostStore } from "../posts/store";
+import { useAuthorStore } from "../authors/store";
+import LoadingSkeleton from "../LoadingSkeleton";
+import "@/app/page.css";
 
-import YouTubeEmbed from '@/components/mdx/YouTubeEmbed';
-import Giscus from '@giscus/react';
-import { useUserConfigStore } from '../userConfig/store';
+import YouTubeEmbed from "@/components/mdx/YouTubeEmbed";
+import Giscus from "@giscus/react";
+import { useUserConfigStore } from "../userConfig/store";
 interface ArticleModalProps {
     slug: string;
     initialPost?: PostItem;
@@ -42,8 +47,16 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ slug, initialPost }) => {
     const { authors, fetchAuthors } = useAuthorStore();
     const { theme } = useUserConfigStore();
 
-    const [selectedMarkdown, setSelectedMarkdown] = useState<string | null>(null);
-    const [serializedMarkdown, setSerializedMarkdown] = useState<MDXRemoteSerializeResult<Record<string, unknown>, Record<string, unknown>>>();
+    const [selectedMarkdown, setSelectedMarkdown] = useState<string | null>(
+        null,
+    );
+    const [serializedMarkdown, setSerializedMarkdown] =
+        useState<
+            MDXRemoteSerializeResult<
+                Record<string, unknown>,
+                Record<string, unknown>
+            >
+        >();
 
     const [popularPosts, setPopularPosts] = useState<PostItem[]>([]);
 
@@ -53,9 +66,9 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ slug, initialPost }) => {
     const [loading, setLoading] = useState<boolean>(!initialPost);
 
     //? Encoded link and text for sharing purpose on social media
-    // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-    const baseShareUrl = 'https://yalovets.blog';
-    const postUrl = encodeURIComponent(baseShareUrl + '/' + selectedPost?.slug);
+    const baseUrl =
+        process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+    const postUrl = encodeURIComponent(baseUrl + "/" + selectedPost?.slug);
     const postText = encodeURIComponent(selectedPost?.title as string);
 
     const pathname = usePathname();
@@ -65,7 +78,11 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ slug, initialPost }) => {
     const components = useMDXComponents();
 
     useEffect(() => {
-        if (initialPost && initialPost.slug === slug && (!selectedPost || selectedPost.slug !== slug)) {
+        if (
+            initialPost &&
+            initialPost.slug === slug &&
+            (!selectedPost || selectedPost.slug !== slug)
+        ) {
             setSelectedPost(initialPost);
             setLoading(false);
         }
@@ -116,7 +133,7 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ slug, initialPost }) => {
         let isMounted = true;
 
         const returnToPost = async () => {
-            if (typeof window === 'undefined') return;
+            if (typeof window === "undefined") return;
             if (loading) return;
 
             if (selectedPost === null && slug) {
@@ -125,7 +142,9 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ slug, initialPost }) => {
                     return;
                 }
 
-                const postFromCache = posts.find(post => post.slug === slug) as PostItem;
+                const postFromCache = posts.find(
+                    (post) => post.slug === slug,
+                ) as PostItem;
                 let post: PostItem;
 
                 if (postFromCache) {
@@ -165,7 +184,9 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ slug, initialPost }) => {
         const fetchAdjacentPosts = async () => {
             if (!selectedPost || !selectedPost.created_at) return;
 
-            const { prevPost, nextPost } = await getAdjacentPosts(selectedPost.created_at);
+            const { prevPost, nextPost } = await getAdjacentPosts(
+                selectedPost.created_at,
+            );
 
             setPrevPost(prevPost);
             setNextPost(nextPost);
@@ -191,7 +212,9 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ slug, initialPost }) => {
         }
     }, [slug, loading, initialPost]);
 
-    const author = authors.find(author => author.id === selectedPost?.author_id);
+    const author = authors.find(
+        (author) => author.id === selectedPost?.author_id,
+    );
 
     if (!slug) return null;
 
@@ -205,10 +228,17 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ slug, initialPost }) => {
                                 <div className="row">
                                     <div className="col-md-2">
                                         <div className="h-min mt-md-2 mb-2 mb-md-0 d-flex justify-content-md-center">
-                                            <button onClick={() => closeModal()} className="d-block d-md-none btn-outlined py-2 px-md-3">
+                                            <button
+                                                onClick={() => closeModal()}
+                                                className="d-block d-md-none btn-outlined py-2 px-md-3"
+                                            >
                                                 ← Back
                                             </button>
-                                            <button onClick={() => closeModal()} className="d-none d-md-block btn-pill py-2 px-md-2" aria-label="Back to articles">
+                                            <button
+                                                onClick={() => closeModal()}
+                                                className="d-none d-md-block btn-pill py-2 px-md-2"
+                                                aria-label="Back to articles"
+                                            >
                                                 ←
                                             </button>
                                         </div>
@@ -216,13 +246,22 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ slug, initialPost }) => {
                                     <div className="col-md-8 text-left">
                                         {!loading && selectedPost && (
                                             <>
-                                                <h1 className="d-none d-lg-block heading-xlarge w-100 col-md-11 col-lg-12" id="col-heading-1">
+                                                <h1
+                                                    className="d-none d-lg-block heading-xlarge w-100 col-md-11 col-lg-12"
+                                                    id="col-heading-1"
+                                                >
                                                     {selectedPost.title}
                                                 </h1>
-                                                <h1 className="d-none d-md-block d-lg-none px-2 heading-large w-100 col-md-11 col-lg-12" id="col-heading-1">
+                                                <h1
+                                                    className="d-none d-md-block d-lg-none px-2 heading-large w-100 col-md-11 col-lg-12"
+                                                    id="col-heading-1"
+                                                >
                                                     {selectedPost.title}
                                                 </h1>
-                                                <h1 className="d-block d-md-none px-2 heading-larger w-100 col-md-11 col-lg-12" id="col-heading-1">
+                                                <h1
+                                                    className="d-block d-md-none px-2 heading-larger w-100 col-md-11 col-lg-12"
+                                                    id="col-heading-1"
+                                                >
                                                     {selectedPost.title}
                                                 </h1>
 
@@ -233,65 +272,158 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ slug, initialPost }) => {
                                         )}
                                         {!loading && selectedPost && author && (
                                             <div className="d-flex justify-content-left mb-1 gap-2">
-                                                <p className="m-0 subheading-xsmall">{moment.utc(selectedPost.created_at).format('D MMM YYYY')} </p>
+                                                <p className="m-0 subheading-xsmall">
+                                                    {moment
+                                                        .utc(
+                                                            selectedPost.created_at,
+                                                        )
+                                                        .format(
+                                                            "D MMM YYYY",
+                                                        )}{" "}
+                                                </p>
                                                 {/* <p className="m-0">•</p> */}
-                                                <p className="m-0 subheading-xsmall">•</p>
-                                                <p className="m-0 subheading-xsmall">{selectedPost.read_time} min</p>
-                                                <p className="m-0 subheading-xsmall">•</p>
-                                                <p className="m-0 subheading-xsmall">{selectedPost.views_count} views</p>
-                                                <p className="m-0 subheading-xsmall">•</p>
-                                                <Link href={`/author/${author.handle}`} className="d-flex align-items-center gap-1 a-link h-min subheading-xsmall">
+                                                <p className="m-0 subheading-xsmall">
+                                                    •
+                                                </p>
+                                                <p className="m-0 subheading-xsmall">
+                                                    {selectedPost.read_time} min
+                                                </p>
+                                                <p className="m-0 subheading-xsmall">
+                                                    •
+                                                </p>
+                                                <p className="m-0 subheading-xsmall">
+                                                    {selectedPost.views_count}{" "}
+                                                    views
+                                                </p>
+                                                <p className="m-0 subheading-xsmall">
+                                                    •
+                                                </p>
+                                                <Link
+                                                    href={`/author/${author.handle}`}
+                                                    className="d-flex align-items-center gap-1 a-link h-min subheading-xsmall"
+                                                >
                                                     {author.full_name}
                                                 </Link>
-                                                {author.role === 'guest' && (
+                                                {author.role === "guest" && (
                                                     <p className="m-0">
-                                                        <span className="badge badge-guest">Guest</span>
+                                                        <span className="badge badge-guest">
+                                                            Guest
+                                                        </span>
                                                     </p>
                                                 )}
-                                                {moment.utc(selectedPost.updated_at).isAfter(moment.utc(selectedPost.created_at)) && !selectedPost.sponsored_by && (
-                                                    <>
-                                                        <p className="d-none d-md-block m-0 subheading-xsmall">•</p>
-                                                        <span className="d-none d-md-block px-2 m-0 rounded-pill text-bg-secondary">{'Updated ' + moment.utc(selectedPost.updated_at).fromNow()}</span>
-                                                    </>
-                                                )}
+                                                {moment
+                                                    .utc(
+                                                        selectedPost.updated_at,
+                                                    )
+                                                    .isAfter(
+                                                        moment.utc(
+                                                            selectedPost.created_at,
+                                                        ),
+                                                    ) &&
+                                                    !selectedPost.sponsored_by && (
+                                                        <>
+                                                            <p className="d-none d-md-block m-0 subheading-xsmall">
+                                                                •
+                                                            </p>
+                                                            <span className="d-none d-md-block px-2 m-0 rounded-pill text-bg-secondary">
+                                                                {"Updated " +
+                                                                    moment
+                                                                        .utc(
+                                                                            selectedPost.updated_at,
+                                                                        )
+                                                                        .fromNow()}
+                                                            </span>
+                                                        </>
+                                                    )}
                                             </div>
                                         )}
-                                        {!loading && selectedPost && moment.utc(selectedPost.updated_at).isAfter(moment.utc(selectedPost.created_at)) && !selectedPost.sponsored_by && (
-                                            <span className="d-md-none px-2 mb-4 rounded-pill text-bg-secondary" id="mobileUpdatedBadge">
-                                                {'Updated ' + moment.utc(selectedPost.updated_at).fromNow()}
-                                            </span>
-                                        )}
-                                        {!loading && selectedPost && selectedPost.sponsored_by && (
-                                            <span className="px-2 mb-4 rounded-pill badge-sponsored">
-                                                Sponsored by{' '}
-                                                {selectedPost.sponsor_url ? (
-                                                    <Link href={selectedPost.sponsor_url} target="_blank" className="a-link a-link-active">
-                                                        <strong>{selectedPost.sponsored_by}</strong>
-                                                    </Link>
-                                                ) : (
-                                                    <strong>{selectedPost.sponsored_by}</strong>
-                                                )}
-                                            </span>
-                                        )}
+                                        {!loading &&
+                                            selectedPost &&
+                                            moment
+                                                .utc(selectedPost.updated_at)
+                                                .isAfter(
+                                                    moment.utc(
+                                                        selectedPost.created_at,
+                                                    ),
+                                                ) &&
+                                            !selectedPost.sponsored_by && (
+                                                <span
+                                                    className="d-md-none px-2 mb-4 rounded-pill text-bg-secondary"
+                                                    id="mobileUpdatedBadge"
+                                                >
+                                                    {"Updated " +
+                                                        moment
+                                                            .utc(
+                                                                selectedPost.updated_at,
+                                                            )
+                                                            .fromNow()}
+                                                </span>
+                                            )}
+                                        {!loading &&
+                                            selectedPost &&
+                                            selectedPost.sponsored_by && (
+                                                <span className="px-2 mb-4 rounded-pill badge-sponsored">
+                                                    Sponsored by{" "}
+                                                    {selectedPost.sponsor_url ? (
+                                                        <Link
+                                                            href={
+                                                                selectedPost.sponsor_url
+                                                            }
+                                                            target="_blank"
+                                                            className="a-link a-link-active"
+                                                        >
+                                                            <strong>
+                                                                {
+                                                                    selectedPost.sponsored_by
+                                                                }
+                                                            </strong>
+                                                        </Link>
+                                                    ) : (
+                                                        <strong>
+                                                            {
+                                                                selectedPost.sponsored_by
+                                                            }
+                                                        </strong>
+                                                    )}
+                                                </span>
+                                            )}
                                     </div>
                                 </div>
                                 <div className="row mt-5">
-                                    <div className={`col-12 col-md-2 ${styles.social_links}`}>
+                                    <div
+                                        className={`col-12 col-md-2 ${styles.social_links}`}
+                                    >
                                         {!loading && selectedPost && (
                                             <>
-                                                <Link href={`https://x.com/share?url=${postUrl}&text=${postText}`} title="Share on X" target="_blank">
+                                                <Link
+                                                    href={`https://x.com/share?url=${postUrl}&text=${postText}`}
+                                                    title="Share on X"
+                                                    target="_blank"
+                                                >
                                                     <FaXTwitter className="fs-1 p-1" />
                                                 </Link>
 
-                                                <Link href={`https://www.linkedin.com/cws/share?url=${postUrl}`} title="Share on LinkedIn" target="_blank">
+                                                <Link
+                                                    href={`https://www.linkedin.com/cws/share?url=${postUrl}`}
+                                                    title="Share on LinkedIn"
+                                                    target="_blank"
+                                                >
                                                     <FaLinkedin className="fs-1 p-1" />
                                                 </Link>
 
-                                                <Link href={`https://www.reddit.com/submit?url=${postUrl}`} title="Share on Reddit" target="_blank">
+                                                <Link
+                                                    href={`https://www.reddit.com/submit?url=${postUrl}`}
+                                                    title="Share on Reddit"
+                                                    target="_blank"
+                                                >
                                                     <FaRedditAlien className="fs-1 p-1" />
                                                 </Link>
 
-                                                <Link href={`https://www.facebook.com/sharer/sharer.php?u=${postUrl}`} title="Share on Facebook" target="_blank">
+                                                <Link
+                                                    href={`https://www.facebook.com/sharer/sharer.php?u=${postUrl}`}
+                                                    title="Share on Facebook"
+                                                    target="_blank"
+                                                >
                                                     <FaFacebookF className="fs-1 p-1" />
                                                 </Link>
                                             </>
@@ -300,49 +432,138 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ slug, initialPost }) => {
                                     <div className="col-12 col-md-8">
                                         <article className="article">
                                             {!loading && serializedMarkdown ? (
-                                                <Suspense fallback={<LoadingSkeleton />}>
-                                                    <MDXProvider components={components}>
-                                                        <MDXRemote compiledSource={serializedMarkdown?.compiledSource as string} scope={serializedMarkdown?.scope} frontmatter={serializedMarkdown?.frontmatter} components={{ YouTubeEmbed }} />
+                                                <Suspense
+                                                    fallback={
+                                                        <LoadingSkeleton />
+                                                    }
+                                                >
+                                                    <MDXProvider
+                                                        components={components}
+                                                    >
+                                                        <MDXRemote
+                                                            compiledSource={
+                                                                serializedMarkdown?.compiledSource as string
+                                                            }
+                                                            scope={
+                                                                serializedMarkdown?.scope
+                                                            }
+                                                            frontmatter={
+                                                                serializedMarkdown?.frontmatter
+                                                            }
+                                                            components={{
+                                                                YouTubeEmbed,
+                                                            }}
+                                                        />
                                                     </MDXProvider>
                                                 </Suspense>
                                             ) : (
                                                 <LoadingSkeleton />
                                             )}
                                         </article>
-                                        {!loading && selectedPost?.tags && selectedPost.tags.length > 0 && (
-                                            <div className="mt-4 mb-2 d-flex flex-wrap gap-2">
-                                                {selectedPost.tags.map((tag, index) => (
-                                                    <Link
-                                                        key={index}
-                                                        href={`/tag/${tag.tag}`}
-                                                        className="badge border px-3 py-2 text-decoration-none interactive-pill"
-                                                        style={{ borderRadius: '8px', fontSize: '0.95rem', fontWeight: 500, backgroundColor: 'var(--col-background-elements)', color: 'var(--col-link)', borderColor: 'var(--col-outline-default)' }}
-                                                    >
-                                                        {tag.title}
-                                                    </Link>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {!loading && selectedPost && (prevPost || nextPost) && (
-                                            <div className="d-flex justify-content-between border mt-5 mb-4 overflow-hidden" style={{ borderRadius: '8px', backgroundColor: 'var(--col-background-elements)', borderColor: 'var(--col-outline-default)' }}>
-                                                <div className="w-50 text-start">
-                                                    {prevPost && (
-                                                        <Link href={`/${prevPost.slug}`} className="d-block w-100 h-100 text-decoration-none p-4 interactive-pill">
-                                                            <div className="small mb-2 fw-semibold" id="col-heading-2" style={{ letterSpacing: '1px' }}>« PREV</div>
-                                                            <div style={{ fontSize: '1.15rem', color: 'var(--col-link)' }}>{prevPost.title}</div>
-                                                        </Link>
+                                        {!loading &&
+                                            selectedPost?.tags &&
+                                            selectedPost.tags.length > 0 && (
+                                                <div className="mt-4 mb-2 d-flex flex-wrap gap-2">
+                                                    {selectedPost.tags.map(
+                                                        (tag, index) => (
+                                                            <Link
+                                                                key={index}
+                                                                href={`/tag/${tag.tag}`}
+                                                                className="badge border px-3 py-2 text-decoration-none interactive-pill"
+                                                                style={{
+                                                                    borderRadius:
+                                                                        "8px",
+                                                                    fontSize:
+                                                                        "0.95rem",
+                                                                    fontWeight: 500,
+                                                                    backgroundColor:
+                                                                        "var(--col-background-elements)",
+                                                                    color: "var(--col-link)",
+                                                                    borderColor:
+                                                                        "var(--col-outline-default)",
+                                                                }}
+                                                            >
+                                                                {tag.title}
+                                                            </Link>
+                                                        ),
                                                     )}
                                                 </div>
-                                                <div className="w-50 text-end">
-                                                    {nextPost && (
-                                                        <Link href={`/${nextPost.slug}`} className="d-block w-100 h-100 text-decoration-none p-4 interactive-pill">
-                                                            <div className="small mb-2 fw-semibold" id="col-heading-2" style={{ letterSpacing: '1px' }}>NEXT »</div>
-                                                            <div style={{ fontSize: '1.15rem', color: 'var(--col-link)' }}>{nextPost.title}</div>
-                                                        </Link>
-                                                    )}
+                                            )}
+                                        {!loading &&
+                                            selectedPost &&
+                                            (prevPost || nextPost) && (
+                                                <div
+                                                    className="d-flex justify-content-between border mt-5 mb-4 overflow-hidden"
+                                                    style={{
+                                                        borderRadius: "8px",
+                                                        backgroundColor:
+                                                            "var(--col-background-elements)",
+                                                        borderColor:
+                                                            "var(--col-outline-default)",
+                                                    }}
+                                                >
+                                                    <div className="w-50 text-start">
+                                                        {prevPost && (
+                                                            <Link
+                                                                href={`/${prevPost.slug}`}
+                                                                className="d-block w-100 h-100 text-decoration-none p-4 interactive-pill"
+                                                            >
+                                                                <div
+                                                                    className="small mb-2 fw-semibold"
+                                                                    id="col-heading-2"
+                                                                    style={{
+                                                                        letterSpacing:
+                                                                            "1px",
+                                                                    }}
+                                                                >
+                                                                    « PREV
+                                                                </div>
+                                                                <div
+                                                                    style={{
+                                                                        fontSize:
+                                                                            "1.15rem",
+                                                                        color: "var(--col-link)",
+                                                                    }}
+                                                                >
+                                                                    {
+                                                                        prevPost.title
+                                                                    }
+                                                                </div>
+                                                            </Link>
+                                                        )}
+                                                    </div>
+                                                    <div className="w-50 text-end">
+                                                        {nextPost && (
+                                                            <Link
+                                                                href={`/${nextPost.slug}`}
+                                                                className="d-block w-100 h-100 text-decoration-none p-4 interactive-pill"
+                                                            >
+                                                                <div
+                                                                    className="small mb-2 fw-semibold"
+                                                                    id="col-heading-2"
+                                                                    style={{
+                                                                        letterSpacing:
+                                                                            "1px",
+                                                                    }}
+                                                                >
+                                                                    NEXT »
+                                                                </div>
+                                                                <div
+                                                                    style={{
+                                                                        fontSize:
+                                                                            "1.15rem",
+                                                                        color: "var(--col-link)",
+                                                                    }}
+                                                                >
+                                                                    {
+                                                                        nextPost.title
+                                                                    }
+                                                                </div>
+                                                            </Link>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
                                     </div>
                                 </div>
                             </div>
@@ -351,42 +572,99 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ slug, initialPost }) => {
                             <div className="container-fluid about-me py-5 mt-5 px-0">
                                 <div className="container row">
                                     <div id="mobileAboutMeTop">
-                                        <div className="col-2 col-md-2 col-lg-1 about-me-image-container" id="mobileImageContainer">
-                                            <Image className="img-fluid about-me-image" src={author.avatar_url || '/ui/avatar.png'} alt="pfp" title={author.full_name.split(' ').at(0)} width={290} height={290} sizes="(min-width: 1200px) 1140px, (min-width: 992px) 960px" loading="lazy" />
+                                        <div
+                                            className="col-2 col-md-2 col-lg-1 about-me-image-container"
+                                            id="mobileImageContainer"
+                                        >
+                                            <Image
+                                                className="img-fluid about-me-image"
+                                                src={
+                                                    author.avatar_url ||
+                                                    "/ui/avatar.png"
+                                                }
+                                                alt="pfp"
+                                                title={author.full_name
+                                                    .split(" ")
+                                                    .at(0)}
+                                                width={290}
+                                                height={290}
+                                                sizes="(min-width: 1200px) 1140px, (min-width: 992px) 960px"
+                                                loading="lazy"
+                                            />
                                         </div>
 
                                         <div className="">
-                                            <Link href={`/author/${author.handle}`}>
-                                                <button className="btn-outlined py-1">Visit</button>
+                                            <Link
+                                                href={`/author/${author.handle}`}
+                                            >
+                                                <button className="btn-outlined py-1">
+                                                    Visit
+                                                </button>
                                             </Link>
                                         </div>
                                     </div>
 
                                     <div className="d-none d-md-flex col-2 col-md-2 col-lg-1 about-me-image-container">
-                                        <Image className="img-fluid about-me-image" src={author.avatar_url || '/ui/avatar.png'} alt="pfp" title={author.full_name.split(' ').at(0)} width={290} height={290} sizes="(min-width: 1200px) 1140px, (min-width: 992px) 960px" loading="lazy" />
+                                        <Image
+                                            className="img-fluid about-me-image"
+                                            src={
+                                                author.avatar_url ||
+                                                "/ui/avatar.png"
+                                            }
+                                            alt="pfp"
+                                            title={author.full_name
+                                                .split(" ")
+                                                .at(0)}
+                                            width={290}
+                                            height={290}
+                                            sizes="(min-width: 1200px) 1140px, (min-width: 992px) 960px"
+                                            loading="lazy"
+                                        />
                                     </div>
 
                                     <div className="col-9 col-md-6 col-lg-7 p-0 mt-md-0">
-                                        <div className="d-none d-md-flex" id="about-me-info">
+                                        <div
+                                            className="d-none d-md-flex"
+                                            id="about-me-info"
+                                        >
                                             <div>
-                                                <Link className="a-link a-button" href={`/author/${author.handle}`}>
-                                                    <h1 className="subheading-smaller m-0">Written by {author.full_name}</h1>
+                                                <Link
+                                                    className="a-link a-button"
+                                                    href={`/author/${author.handle}`}
+                                                >
+                                                    <h1 className="subheading-smaller m-0">
+                                                        Written by{" "}
+                                                        {author.full_name}
+                                                    </h1>
                                                 </Link>
                                             </div>
 
                                             <div className="d-none d-sm-block">
-                                                <Link href={`/author/${author.handle}`}>
-                                                    <button className="btn-outlined py-1">Visit</button>
+                                                <Link
+                                                    href={`/author/${author.handle}`}
+                                                >
+                                                    <button className="btn-outlined py-1">
+                                                        Visit
+                                                    </button>
                                                 </Link>
                                             </div>
                                         </div>
                                         <div>
                                             <div className="d-block d-md-none mt-2">
-                                                <Link className="a-link a-button" href={`/author/${author.handle}`}>
-                                                    <h1 className="subheading-smaller m-0">Written by {author.full_name}</h1>
+                                                <Link
+                                                    className="a-link a-button"
+                                                    href={`/author/${author.handle}`}
+                                                >
+                                                    <h1 className="subheading-smaller m-0">
+                                                        Written by{" "}
+                                                        {author.full_name}
+                                                    </h1>
                                                 </Link>
                                             </div>
-                                            <p className="col-10 subheading-xsmall about-me-bio pt-2 pt-md-0 p-md-0 m-0" id="col-heading-1">
+                                            <p
+                                                className="col-10 subheading-xsmall about-me-bio pt-2 pt-md-0 p-md-0 m-0"
+                                                id="col-heading-1"
+                                            >
                                                 {author.bio}
                                             </p>
                                         </div>
@@ -449,7 +727,11 @@ const ArticleModal: React.FC<ArticleModalProps> = ({ slug, initialPost }) => {
                                     reactionsEnabled="1"
                                     emitMetadata="0"
                                     inputPosition="bottom"
-                                    theme={theme === 'dark' ? 'dark_dimmed' : 'light'}
+                                    theme={
+                                        theme === "dark"
+                                            ? "dark_dimmed"
+                                            : "light"
+                                    }
                                     lang="en"
                                     loading="lazy"
                                 />

@@ -16,7 +16,7 @@ function getClientIp(request: NextRequest): string {
 export function middleware(request: NextRequest) {
     const clientIp = getClientIp(request);
 
-    const envIps = process.env.ALLOWED_ADMIN_IPS;
+    const envIps = process.env.ALLOWED_ADMIN_IPS || "";
     const allowedIps = envIps
         .split(",")
         .map((ip) => ip.trim())
